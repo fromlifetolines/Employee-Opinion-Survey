@@ -35,7 +35,7 @@ export default function AdminLogin() {
         // 儲存 JWT 令牌到 localStorage
         localStorage.setItem("adminToken", result.token);
         toast.success("登入成功");
-        setLocation("/admin/dashboard");
+        setLocation("/admin/surveys");
       } else {
         toast.error("登入失敗");
       }

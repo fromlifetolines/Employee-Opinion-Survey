@@ -18,6 +18,7 @@ import {
 import bcrypt from "bcryptjs";
 import { TRPCError } from "@trpc/server";
 import { generateAdminToken, verifyAdminToken } from "./_core/adminAuth";
+import { surveyManagementRouter } from "./routers/surveyManagement";
 
 /**
  * 管理員驗證 procedure
@@ -45,6 +46,7 @@ const adminProcedure = publicProcedure.use(async ({ ctx, next }) => {
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+  surveyManagement: surveyManagementRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

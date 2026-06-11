@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import SurveyForm from "./pages/SurveyForm";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSurveyManager from "./pages/AdminSurveyManager";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/survey/:slug" component={SurveyForm} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/surveys" component={AdminSurveyManager} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
