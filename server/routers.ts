@@ -21,6 +21,7 @@ import { generateAdminToken, verifyAdminToken } from "./_core/adminAuth";
 import { surveyManagementRouter } from "./routers/surveyManagement";
 import { notificationsRouter } from "./routers/notifications";
 import { createNotification } from "./db-notifications";
+import { qrcodeRouter } from "./routers/qrcode";
 
 /**
  * 管理員驗證 procedure
@@ -50,6 +51,7 @@ export const appRouter = router({
   system: systemRouter,
   surveyManagement: surveyManagementRouter,
   notifications: notificationsRouter,
+  qrcode: qrcodeRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
