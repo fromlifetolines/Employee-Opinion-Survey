@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, surveys, questions, responses, adminPasswords, Survey, Question, Response, InsertResponse } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,190 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+/**
+ * 調查系統查詢函式
+ */
+
+/**
+ * 根據 slug 獲取調查問卷
+ */
+export async function getSurveyBySlug(slug: string): Promise<Survey | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(surveys)
+    .where(eq(surveys.slug, slug))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * 根據調查 ID 獲取所有題目
+ */
+export async function getQuestionsBySurveyId(surveyId: number): Promise<Question[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(questions)
+    .where(eq(questions.surveyId, surveyId))
+    .orderBy(questions.order);
+}
+
+/**
+ * 儲存匿名回答（不記錄任何身份資訊）
+ */
+export async function saveResponse(response: InsertResponse): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save response: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(responses).values(response);
+  } catch (error) {
+    console.error("[Database] Failed to save response:", error);
+    throw error;
+  }
+}
+
+/**
+ * 根據調查 ID 和題目 ID 獲取所有回答
+ */
+export async function getResponsesByQuestion(
+  surveyId: number,
+  questionId: number
+): Promise<Response[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(responses)
+    .where(and(eq(responses.surveyId, surveyId), eq(responses.questionId, questionId)));
+}
+
+/**
+ * 根據調查 ID 獲取所有回答
+ */
+export async function getResponsesBySurvey(surveyId: number): Promise<Response[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(responses)
+    .where(eq(responses.surveyId, surveyId))
+    .orderBy(desc(responses.submittedAt));
+}
+
+/**
+ * 建立新的調查問卷
+ */
+export async function createSurvey(
+  slug: string,
+  title: string,
+  description?: string
+): Promise<Survey | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    const result = await db.insert(surveys).values({
+      slug,
+      title,
+      description,
+      status: "draft",
+    });
+
+    return getSurveyBySlug(slug);
+  } catch (error) {
+    console.error("[Database] Failed to create survey:", error);
+    throw error;
+  }
+}
+
+/**
+ * 建立新的題目
+ */
+export async function createQuestion(
+  surveyId: number,
+  order: number,
+  text: string,
+  type: "single" | "multiple" | "rating" | "text",
+  options?: unknown,
+  required: boolean = true
+): Promise<Question | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    const result = await db.insert(questions).values({
+      surveyId,
+      order,
+      text,
+      type,
+      options,
+      required: required ? 1 : 0,
+    });
+
+    const questionId = (result as any).insertId;
+    const created = await db.select().from(questions).where(eq(questions.id, questionId)).limit(1);
+    return created.length > 0 ? created[0] : undefined;
+  } catch (error) {
+    console.error("[Database] Failed to create question:", error);
+    throw error;
+  }
+}
+
+/**
+ * 更新調查狀態
+ */
+export async function updateSurveyStatus(
+  surveyId: number,
+  status: "draft" | "active" | "closed"
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db.update(surveys).set({ status }).where(eq(surveys.id, surveyId));
+  } catch (error) {
+    console.error("[Database] Failed to update survey status:", error);
+    throw error;
+  }
+}
+
+/**
+ * 驗證管理員密碼
+ */
+export async function getAdminPasswordHash(): Promise<string | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(adminPasswords).limit(1);
+  return result.length > 0 ? result[0].passwordHash : undefined;
+}
+
+/**
+ * 設定管理員密碼
+ */
+export async function setAdminPassword(passwordHash: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    // 先刪除舊密碼
+    await db.delete(adminPasswords);
+    // 插入新密碼
+    await db.insert(adminPasswords).values({ passwordHash });
+  } catch (error) {
+    console.error("[Database] Failed to set admin password:", error);
+    throw error;
+  }
+}
