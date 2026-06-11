@@ -19,6 +19,8 @@ import bcrypt from "bcryptjs";
 import { TRPCError } from "@trpc/server";
 import { generateAdminToken, verifyAdminToken } from "./_core/adminAuth";
 import { surveyManagementRouter } from "./routers/surveyManagement";
+import { notificationsRouter } from "./routers/notifications";
+import { createNotification } from "./db-notifications";
 
 /**
  * 管理員驗證 procedure
@@ -47,6 +49,7 @@ export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   surveyManagement: surveyManagementRouter,
+  notifications: notificationsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -195,6 +198,19 @@ export const appRouter = router({
               questionId: response.questionId,
               answer: response.answer,
             });
+          }
+
+          // 觸發通知給管理員
+          try {
+            await createNotification({
+              surveyId: survey.id,
+              type: "submission",
+              title: `新的調查回答: ${survey.title}`,
+              content: `已接收到 ${input.responses.length} 份回答`,
+            });
+          } catch (notificationError) {
+            console.warn("[API] Failed to create notification:", notificationError);
+            // 不中斷主流程
           }
 
           return { success: true };

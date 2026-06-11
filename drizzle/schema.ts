@@ -110,3 +110,51 @@ export const adminPasswords = mysqlTable("adminPasswords", {
 
 export type AdminPassword = typeof adminPasswords.$inferSelect;
 export type InsertAdminPassword = typeof adminPasswords.$inferInsert;
+
+/**
+ * 管理員通知表
+ * 記錄員工提交調查回答時的通知
+ */
+export const adminNotifications = mysqlTable("adminNotifications", {
+  id: int("id").autoincrement().primaryKey(),
+  /** 所屬問卷的 ID */
+  surveyId: int("surveyId").notNull(),
+  /** 通知類型：submission（新提交）、milestone（里程碑） */
+  type: mysqlEnum("type", ["submission", "milestone"]).notNull(),
+  /** 通知標題 */
+  title: text("title").notNull(),
+  /** 通知內容 */
+  content: text("content"),
+  /** 是否已讀 */
+  isRead: int("isRead").default(0).notNull(),
+  /** 建立時間 */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AdminNotification = typeof adminNotifications.$inferSelect;
+export type InsertAdminNotification = typeof adminNotifications.$inferInsert;
+
+/**
+ * 調查分享統計表
+ * 記錄調查連結的分享與點擊次數
+ */
+export const shareStats = mysqlTable("shareStats", {
+  id: int("id").autoincrement().primaryKey(),
+  /** 所屬問卷的 ID */
+  surveyId: int("surveyId").notNull(),
+  /** 分享連結 */
+  link: text("link").notNull(),
+  /** 分享次數 */
+  shareCount: int("shareCount").default(0).notNull(),
+  /** 點擊次數 */
+  clickCount: int("clickCount").default(0).notNull(),
+  /** 最後分享時間 */
+  lastSharedAt: timestamp("lastSharedAt"),
+  /** 建立時間 */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  /** 更新時間 */
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ShareStat = typeof shareStats.$inferSelect;
+export type InsertShareStat = typeof shareStats.$inferInsert;
