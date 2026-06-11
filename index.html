@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>伯堅股份有限公司 | 員工滿意度調查表</title>
+  
+  <!-- Google Fonts: Playfair Display for headers, Outfit for clean body reading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Bodoni Moda"', 'serif'],
+            sans: ['"Outfit"', 'sans-serif'],
+          },
+          colors: {
+            editorial: {
+              bg: '#F9F8F6', // Off-white / Warm cream
+              card: '#FFFFFF',
+              text: '#222222',
+              muted: '#6C6C68',
+              border: '#E3E2DE',
+              accent: '#3E4A3F', // Forest Slate Green
+              accentHover: '#2E382F',
+              success: '#4A5D4E',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F9F8F6;
+      color: #222222;
+    }
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Custom Scrollbar for list */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F3F2EE;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D5D4CF;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B8B7B2;
+    }
+  </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col justify-between selection:bg-editorial-accent selection:text-white">
+
+  <!-- 頂部設定提示 (只在未設定 API_URL 時顯示) -->
+  <div id="setup-warning" class="bg-amber-50 border-b border-amber-200 text-amber-800 px-4 py-3 text-sm text-center hidden">
+    <strong>⚠️ 系統尚未完成設定：</strong> 請先部署 Google Apps Script，並將得到的網頁應用程式網址填入本檔案內（第 60 行的 <code>API_URL</code>）！
+  </div>
+
+  <script>
+    // 🔗 【設定區】在此處填入您部署的 Google Apps Script 網頁應用程式 URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbwI3gSCnLT6rU8gFJk5jFyFUI-DGySTlLY42LqFp87IyeLd_xkomL7p38ZVUP8zsFS9/exec";
+  </script>
+
+  <!-- 主容器 -->
+  <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+    
+    <!-- 1. 問卷填寫介面 -->
+    <section id="survey-section" class="w-full max-w-3xl bg-white border border-editorial-border rounded-xl p-6 md:p-12 shadow-sm fade-in">
+      <div class="mb-10 text-center md:text-left">
+        <span class="text-xs uppercase tracking-widest text-editorial-muted font-semibold block mb-2">Internal Opinion Survey</span>
+        <h1 class="font-serif text-3xl md:text-4xl text-editorial-text font-bold mb-4 leading-tight">伯堅股份有限公司</h1>
+        <h2 class="text-xl md:text-2xl text-editorial-muted font-bold mb-4">員工滿意度調查表</h2>
+        <p class="text-sm text-editorial-muted leading-relaxed">
+          為能規劃出更符合各位同仁需求的工作環境，提高員工的工作效率，改善公司各方面管理制度，透過此問卷方式，徵詢員工寶貴的意見，做為公司未來改進的參考。本問卷採用完全匿名傳輸，絕不收集姓名、電子郵件或 IP 地址，請放心填寫。
+        </p>
+        <div class="h-[1px] bg-editorial-border w-full mt-6"></div>
+      </div>
+
+      <form id="survey-form" class="space-y-8" onsubmit="submitSurvey(event)">
+        
+        <!-- Q1: 您在公司任職多久了 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">1. 您在公司任職多久了？ <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-question="q1">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q1" value="三個月以上，未滿一年" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">三個月以上，未滿一年</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q1" value="一年以上，未滿三年" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">一年以上，未滿三年</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q1" value="三年以上，未滿五年" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">三年以上，未滿五年</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q1" value="五年以上，未滿十年" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">五年以上，未滿十年</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all sm:col-span-2">
+              <input type="radio" name="q1" value="十年以上" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">十年以上</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2: 您對於自己目前工作量的看法是 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">2. 您對於自己目前工作量的看法是？ <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-question="q2">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q2" value="非常多" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常多</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q2" value="有點多，但還能接受" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">有點多，但還能接受</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q2" value="剛好" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">剛好</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q2" value="有點少，希望能承擔更多工作" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">有點少，希望能承擔更多工作</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all sm:col-span-2">
+              <input type="radio" name="q2" value="太少" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">太少</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3: 您希望公司制定薪資福利時考慮的因素有 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">3. 您希望公司制定薪資福利時考慮的因素有？（可多選）</label>
+          <div class="space-y-2" data-question="q3">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q3" value="工作經驗及個人能力" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">工作經驗及個人能力</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q3" value="績效考核的結果" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">績效考核的結果</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q3" value="在公司的服務年資" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">在公司的服務年資</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q3" value="其他" id="q3-other-check" onchange="toggleOtherInput('q3')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q3-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q4: 公司對您最大的吸引力是什麼 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">4. 公司對您最大的吸引力是什麼？（可多選）</label>
+          <div class="space-y-2" data-question="q4">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q4" value="公司發展前景" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">公司發展前景</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q4" value="薪資福利佳" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">薪資福利佳</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q4" value="良好的晉升成長制度" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">良好的晉升成長制度</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q4" value="與同事間相處融洽" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">與同事間相處融洽</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q4" value="主管的管理風格" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">主管的管理風格</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q4" value="其他" id="q4-other-check" onchange="toggleOtherInput('q4')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q4-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q5: 除了公司目前已有的培訓，您還會選擇哪些方面的培訓 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">5. 除了公司目前已有的培訓，您還會選擇哪些方面的培訓？（可多選）</label>
+          <div class="space-y-2" data-question="q5">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q5" value="外語能力課程" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">外語能力課程</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q5" value="專業技能提升" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">專業技能提升</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q5" value="組織管理能力" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">組織管理能力</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q5" value="報考專業證照補助" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">報考專業證照補助</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q5" value="其他" id="q5-other-check" onchange="toggleOtherInput('q5')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q5-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q6: 您對部門之部級主管的認同度 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">6. 您對部門之部級主管的認同度？ <span class="text-red-500">*</span></label>
+          <div class="space-y-2" data-question="q6">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q6" value="很棒的主管, 可以學習到很多" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">很棒的主管, 可以學習到很多</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q6" value="還不錯, 願意教導我們" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">還不錯, 願意教導我們</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q6" value="普通" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">普通</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q6" value="很差" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">很差</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="q6" value="其他" id="q6-other-check" onchange="toggleOtherRadio('q6')" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q6-other-text" oninput="syncRadioOtherText('q6')" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q7: 承上題，您覺得主管在工作分配上是公平的嗎 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">7. 承上題，您覺得主管在工作分配上是公平的嗎？ <span class="text-red-500">*</span></label>
+          <div class="space-y-2" data-question="q7">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q7" value="非常公平" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常公平</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q7" value="還算公平" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">還算公平</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q7" value="普通" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">普通</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q7" value="不公平" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">不公平</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q7" value="非常偏袒別人" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常偏袒別人</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q8: 您清楚明白自己的工作目標 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">8. 您清楚明白自己的工作目標？ <span class="text-red-500">*</span></label>
+          <div class="space-y-2" data-question="q8">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q8" value="非常清楚，主管有明確告知及定期溝通調整" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常清楚，主管有明確告知及定期溝通調整</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q8" value="稍微清楚，主管有告知目前工作目標" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">稍微清楚，主管有告知目前工作目標</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q8" value="不清楚，僅面試當天提過工作內容" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">不清楚，僅面試當天提過工作內容</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q8" value="非常不清楚，僅同仁告訴我工作目標" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常不清楚，僅同仁告訴我工作目標</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q9: 您認為部門存在的主要問題是 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">9. 您認為部門存在的主要問題是？（可多選）</label>
+          <div class="space-y-2" data-question="q9">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q9" value="小團體太多" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">小團體太多</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q9" value="主管不聽下屬的意見" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">主管不聽下屬的意見</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q9" value="工作氣氛不佳" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">工作氣氛不佳</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q9" value="作業流程混亂" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">作業流程混亂</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q9" value="加班太多或太晚下班" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">加班太多或太晚下班</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q9" value="其他" id="q9-other-check" onchange="toggleOtherInput('q9')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q9-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q10: 您認為公司存在的主要問題是 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">10. 您認為公司存在的主要問題是？（可多選）</label>
+          <div class="space-y-2" data-question="q10">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q10" value="升遷制度不健全或不透明" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">升遷制度不健全或不透明</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q10" value="沒有良好溝通管道" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">沒有良好溝通管道</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q10" value="主管無法掌握部屬工作職掌" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">主管無法掌握部屬工作職掌</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q10" value="工作環境或氣氛不佳" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">工作環境或氣氛不佳</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q10" value="員工福利不好" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">員工福利不好</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q10" value="其他" id="q10-other-check" onchange="toggleOtherInput('q10')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q10-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q11: 您對公司的硬體設備覺得何處需要改善 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">11. 您對公司的硬體設備覺得何處需要改善？（可多選）</label>
+          <div class="space-y-2" data-question="q11">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="沒有需要改善的地方" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">沒有需要改善的地方</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="停車位" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">停車位</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="洗手間" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">洗手間</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="茶水間" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">茶水間</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="辦公室" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">辦公室</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q11" value="休息空間" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">休息空間</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q11" value="其他" id="q11-other-check" onchange="toggleOtherInput('q11')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q11-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q12: 您對公司的總體感覺是 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">12. 您對公司的總體感覺是？ <span class="text-red-500">*</span></label>
+          <div class="space-y-2" data-question="q12">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q12" value="非常滿意" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">非常滿意</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q12" value="滿意" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">滿意</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q12" value="普通" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">普通</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q12" value="不太滿意" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">不太滿意</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="q12" value="其他" id="q12-other-check" onchange="toggleOtherRadio('q12')" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q12-other-text" oninput="syncRadioOtherText('q12')" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q13: 希望人資部門給予那些幫助 (單選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">13. 希望人資部門給予那些幫助？ <span class="text-red-500">*</span></label>
+          <div class="space-y-2" data-question="q13">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q13" value="一對一的員工關懷" required class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">一對一的員工關懷</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q13" value="協助和部門主管的溝通" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">協助和部門主管的溝通</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="radio" name="q13" value="建立更完善的升遷制度" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">建立更完善的升遷制度</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="q13" value="其他" id="q13-other-check" onchange="toggleOtherRadio('q13')" class="w-4 h-4 text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q13-other-text" oninput="syncRadioOtherText('q13')" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q14: 希望福委會增加哪些福利措施 (複選) -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">14. 希望福委會增加哪些福利措施？（可多選）</label>
+          <div class="space-y-2" data-question="q14">
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q14" value="多增加特約商店 (飯店、餐廳、住宿等)" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">多增加特約商店 (飯店、餐廳、住宿等)</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q14" value="舉辦公益活動 (淨灘、掃街、探視老人院、孤兒院等)" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">舉辦公益活動 (淨灘、掃街、探視老人院、孤兒院等)</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q14" value="舉辦球類活動 (羽毛球、棒球、籃球、乒乓球等)" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">舉辦球類活動 (羽毛球、棒球、籃球、乒乓球等)</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-editorial-border rounded-lg cursor-pointer hover:bg-neutral-50 transition-all">
+              <input type="checkbox" name="q14" value="增設運動器材 (乒乓球桌等)" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+              <span class="text-sm">增設運動器材 (乒乓球桌等)</span>
+            </label>
+            <div class="border border-editorial-border rounded-lg p-3 space-y-2">
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="q14" value="其他" id="q14-other-check" onchange="toggleOtherInput('q14')" class="w-4 h-4 rounded text-editorial-accent focus:ring-editorial-accent">
+                <span class="text-sm">其他，請說明</span>
+              </label>
+              <input type="text" id="q14-other-text" placeholder="請填寫..." class="w-full p-2 border border-editorial-border rounded bg-editorial-bg text-sm focus:outline-none focus:border-editorial-accent hidden">
+            </div>
+          </div>
+        </div>
+
+        <!-- Q15: 開放式建議 -->
+        <div class="space-y-3">
+          <label class="block text-md font-semibold text-editorial-text">15. 除此之外，您在工作上還有哪些想反映的？或者對公司有哪些意見或建議？</label>
+          <textarea name="q15" id="q15" rows="5" placeholder="歡迎在此寫下您的具體建言..." class="w-full p-4 border border-editorial-border rounded-lg bg-editorial-bg text-editorial-text focus:outline-none focus:border-editorial-accent focus:ring-1 focus:ring-editorial-accent transition-colors resize-y text-sm"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-6">
+          <button type="submit" id="submit-btn" class="w-full bg-editorial-accent hover:bg-editorial-accentHover text-white py-3.5 rounded-lg font-medium transition-all shadow-sm flex items-center justify-center gap-2">
+            <span>提交匿名問卷</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 2. 提交成功畫面 -->
+    <section id="success-section" class="w-full max-w-md bg-white border border-editorial-border rounded-xl p-8 md:p-12 shadow-sm text-center hidden fade-in">
+      <div class="w-16 h-16 bg-emerald-50 text-editorial-success rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 class="font-serif text-3xl text-editorial-text font-bold mb-4 font-serif">問卷已成功送出</h2>
+      <p class="text-editorial-muted text-sm leading-relaxed mb-8">
+        非常感謝您的意見與回饋！我們將在保障完全匿名的前提下，將您寶貴的建議寫入 Google 試算表，做為公司改善制度與環境的重要參考。
+      </p>
+      <button onclick="resetForm()" class="border border-editorial-border hover:bg-editorial-bg text-editorial-text px-6 py-2.5 rounded-lg text-sm transition-colors font-medium">
+        填寫另一份問卷
+      </button>
+    </section>
+
+    <!-- 3. 管理者密碼登入畫面 -->
+    <section id="admin-login-section" class="w-full max-w-md bg-white border border-editorial-border rounded-xl p-8 shadow-sm hidden fade-in">
+      <div class="text-center mb-6">
+        <h2 class="font-serif text-2xl text-editorial-text font-bold mb-2">管理者登入</h2>
+        <p class="text-xs text-editorial-muted">請輸入後端 Google Apps Script 設定的密碼以載入統計報表</p>
+      </div>
+      <form onsubmit="loginAdmin(event)" class="space-y-4">
+        <div>
+          <input type="password" id="admin-password" placeholder="請輸入密碼" required class="w-full p-3 border border-editorial-border rounded-lg bg-editorial-bg text-editorial-text text-center focus:outline-none focus:border-editorial-accent focus:ring-1 focus:ring-editorial-accent">
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="showSection('survey-section')" class="flex-1 border border-editorial-border hover:bg-editorial-bg py-2.5 rounded-lg text-sm font-medium transition-colors">返回問卷</button>
+          <button type="submit" id="login-btn" class="flex-1 bg-editorial-accent hover:bg-editorial-accentHover text-white py-2.5 rounded-lg text-sm font-medium transition-colors">登入驗證</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 4. 管理者儀表板 -->
+    <section id="admin-dashboard-section" class="w-full max-w-6xl bg-white border border-editorial-border rounded-xl p-6 md:p-10 shadow-sm hidden fade-in">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <span class="text-xs uppercase tracking-widest text-editorial-muted font-semibold block mb-1">Owner console</span>
+          <h2 class="font-serif text-3xl text-editorial-text font-bold">問卷統計儀表板</h2>
+        </div>
+        
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <!-- 匯出資料按鈕 -->
+          <button onclick="exportToCSV()" class="flex-1 md:flex-none bg-editorial-success hover:opacity-90 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>匯出試算表 (CSV)</span>
+          </button>
+          
+          <button onclick="logoutAdmin()" class="flex-1 md:flex-none border border-editorial-border hover:bg-editorial-bg px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
+            登出
+          </button>
+        </div>
+      </div>
+
+      <!-- 統計大牌卡 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-editorial-bg p-5 rounded-lg border border-editorial-border">
+          <div class="text-xs text-editorial-muted font-medium mb-1 font-semibold">回覆總件數</div>
+          <div id="stat-total" class="text-3xl font-bold font-serif text-editorial-text">-</div>
+        </div>
+        <div class="bg-editorial-bg p-5 rounded-lg border border-editorial-border">
+          <div class="text-xs text-editorial-muted font-medium mb-1 font-semibold">Q2工作量剛好比例</div>
+          <div id="stat-workload" class="text-3xl font-bold font-serif text-editorial-text">-</div>
+        </div>
+        <div class="bg-editorial-bg p-5 rounded-lg border border-editorial-border">
+          <div class="text-xs text-editorial-muted font-medium mb-1 font-semibold">Q7主管公平性認同</div>
+          <div id="stat-fairness" class="text-3xl font-bold font-serif text-editorial-text">-</div>
+        </div>
+        <div class="bg-editorial-bg p-5 rounded-lg border border-editorial-border">
+          <div class="text-xs text-editorial-muted font-medium mb-1 font-semibold">Q12總體滿意比例</div>
+          <div id="stat-satisfaction" class="text-3xl font-bold font-serif text-editorial-text">-</div>
+        </div>
+      </div>
+
+      <!-- 圖表分析區 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        
+        <!-- 左側：圖表篩選與控制 -->
+        <div class="border border-editorial-border rounded-lg p-5 lg:col-span-1 flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-semibold text-editorial-text mb-3">單題數據視覺化</h3>
+            <p class="text-xs text-editorial-muted mb-4">請在下方選單選擇一個單選或複選題目，即時生成統計圖表分析：</p>
+            <select id="question-select" onchange="loadQuestionChart()" class="w-full p-2.5 border border-editorial-border rounded-lg bg-editorial-bg text-sm text-editorial-text font-medium focus:outline-none focus:border-editorial-accent">
+              <option value="q1">Q1. 公司任職年資 (單選)</option>
+              <option value="q2">Q2. 個人工作量看法 (單選)</option>
+              <option value="q3">Q3. 薪資福利考慮因素 (複選)</option>
+              <option value="q4">Q4. 公司最大吸引力 (複選)</option>
+              <option value="q5">Q5. 希望的培訓方向 (複選)</option>
+              <option value="q6">Q6. 對部門主管認同度 (單選)</option>
+              <option value="q7">Q7. 主管工作分配公平性 (單選)</option>
+              <option value="q8">Q8. 清楚明白工作目標 (單選)</option>
+              <option value="q9">Q9. 部門存在的主要問題 (複選)</option>
+              <option value="q10">Q10. 公司存在的主要問題 (複選)</option>
+              <option value="q11">Q11. 公司硬體設備改善 (複選)</option>
+              <option value="q12">Q12. 對公司總體感覺 (單選)</option>
+              <option value="q13">Q13. 希望人資部門給予幫助 (單選)</option>
+              <option value="q14">Q14. 希望福委會增加福利 (複選)</option>
+            </select>
+          </div>
+          
+          <div class="mt-6 pt-4 border-t border-editorial-border text-xs text-editorial-muted space-y-2">
+            <div class="flex items-center justify-between">
+              <span>📊 圖表類型：</span>
+              <span id="chart-type-indicator" class="font-semibold text-editorial-text">長條圖 / 圓餅圖</span>
+            </div>
+            <div>* 複選題將依照選項獨立統計加總。</div>
+          </div>
+        </div>
+
+        <!-- 右側：Chart.js 圖表呈現 -->
+        <div class="border border-editorial-border rounded-lg p-5 lg:col-span-2">
+          <h3 id="chart-title" class="text-sm font-semibold text-editorial-text mb-4 text-center">統計分佈圖</h3>
+          <div class="h-80 relative">
+            <canvas id="analyzed-chart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 開放性建議文字列表 -->
+      <div class="border border-editorial-border rounded-lg overflow-hidden">
+        <div class="bg-editorial-bg px-6 py-4 border-b border-editorial-border flex justify-between items-center">
+          <h3 class="text-sm font-bold text-editorial-text">Q15. 員工具體建議與意見</h3>
+          <span id="feedback-count" class="text-xs bg-editorial-accent text-white px-2 py-0.5 rounded font-medium">- 則</span>
+        </div>
+        <div class="max-h-[400px] overflow-y-auto divide-y divide-editorial-border" id="feedback-list">
+          <div class="p-6 text-center text-editorial-muted text-sm">尚無任何文字建議。</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾與管理者入口 -->
+  <footer class="p-6 border-t border-editorial-border bg-white text-center">
+    <div class="flex flex-col sm:flex-row justify-between items-center max-w-6xl mx-auto text-xs text-editorial-muted gap-2">
+      <div>© 伯堅股份有限公司 - 員工滿意度調查表</div>
+      <div class="flex gap-4">
+        <span>🔒 匿名傳輸加密保護</span>
+        <button onclick="openAdmin()" class="hover:text-editorial-text hover:underline font-medium">管理者入口</button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 檢查 API 是否設定
+    document.addEventListener("DOMContentLoaded", () => {
+      if (API_URL.includes("xxxxxx")) {
+        document.getElementById("setup-warning").classList.remove("hidden");
+      }
+    });
+
+    // 控制複選題「其他」說明框顯示隱私
+    function toggleOtherInput(qid) {
+      const otherCheck = document.getElementById(`${qid}-other-check`);
+      const otherText = document.getElementById(`${qid}-other-text`);
+      if (otherCheck.checked) {
+        otherText.classList.remove('hidden');
+        otherText.required = true;
+      } else {
+        otherText.classList.add('hidden');
+        otherText.required = false;
+        otherText.value = '';
+      }
+    }
+
+    // 控制單選題「其他」說明框顯示隱私
+    function toggleOtherRadio(qid) {
+      const otherText = document.getElementById(`${qid}-other-text`);
+      // 顯示說明框並設為必填
+      otherText.classList.remove('hidden');
+      otherText.required = true;
+      
+      // 取消同組內非「其他」的點選
+      const radios = document.getElementsByName(qid);
+      radios.forEach(radio => {
+        if (radio.id !== `${qid}-other-check`) {
+          radio.onclick = () => {
+            otherText.classList.add('hidden');
+            otherText.required = false;
+            otherText.value = '';
+          };
+        }
+      });
+    }
+
+    function syncRadioOtherText(qid) {
+      const otherCheck = document.getElementById(`${qid}-other-check`);
+      const otherText = document.getElementById(`${qid}-other-text`).value;
+      otherCheck.value = otherText ? `其他：${otherText}` : '其他';
+    }
+
+    // 切換區塊
+    function showSection(sectionId) {
+      const sections = ['survey-section', 'success-section', 'admin-login-section', 'admin-dashboard-section'];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (id === sectionId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    // 提交問卷動作
+    async function submitSurvey(event) {
+      event.preventDefault();
+      
+      if (API_URL.includes("xxxxxx")) {
+        alert("尚未設定有效的 API_URL，請先修改檔案部署 Google Apps Script 後再提交！");
+        return;
+      }
+
+      const submitBtn = document.getElementById("submit-btn");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>送出中...</span>
+      `;
+
+      // 取得單選與複選答案
+      const payload = {
+        action: "submit",
+        q1: getRadioValue("q1"),
+        q2: getRadioValue("q2"),
+        q3: getCheckboxValues("q3"),
+        q4: getCheckboxValues("q4"),
+        q5: getCheckboxValues("q5"),
+        q6: getRadioValue("q6"),
+        q7: getRadioValue("q7"),
+        q8: getRadioValue("q8"),
+        q9: getCheckboxValues("q9"),
+        q10: getCheckboxValues("q10"),
+        q11: getCheckboxValues("q11"),
+        q12: getRadioValue("q12"),
+        q13: getRadioValue("q13"),
+        q14: getCheckboxValues("q14"),
+        q15: document.getElementById("q15").value
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          showSection('success-section');
+        } else {
+          alert("提交失敗: " + result.message);
+        }
+      } catch (err) {
+        console.error("提交錯誤:", err);
+        alert("問卷提交出錯，請確認您的網路連線或 Apps Script URL 設定。");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    }
+
+    // 取得 Radio 按鈕值，如有其他文字則取其他文字
+    function getRadioValue(name) {
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      if (!selected) return "";
+      if (selected.id === `${name}-other-check`) {
+        const otherText = document.getElementById(`${name}-other-text`).value;
+        return otherText ? `其他：${otherText}` : "其他";
+      }
+      return selected.value;
+    }
+
+    // 取得 Checkbox 按鈕值並拼裝成字串
+    function getCheckboxValues(name) {
+      const checkedBoxes = document.querySelectorAll(`input[name="${name}"]:checked`);
+      const values = [];
+      checkedBoxes.forEach(box => {
+        if (box.value === "其他") {
+          const otherText = document.getElementById(`${name}-other-text`).value;
+          values.push(otherText ? `其他：${otherText}` : "其他");
+        } else {
+          values.push(box.value);
+        }
+      });
+      return values.join("、");
+    }
+
+    // 重設問卷
+    function resetForm() {
+      document.getElementById("survey-form").reset();
+      
+      // 隱藏所有的其他輸入欄位
+      ["q3", "q4", "q5", "q6", "q9", "q10", "q11", "q12", "q13", "q14"].forEach(qid => {
+        const el = document.getElementById(`${qid}-other-text`);
+        if (el) el.classList.add('hidden');
+      });
+
+      showSection('survey-section');
+    }
+
+    // 管理員登入控制
+    let fetchedData = [];
+    let activeChart = null;
+
+    function openAdmin() {
+      showSection('admin-login-section');
+    }
+
+    async function loginAdmin(event) {
+      event.preventDefault();
+      
+      const pwd = document.getElementById("admin-password").value;
+      if (!pwd) return;
+
+      if (API_URL.includes("xxxxxx")) {
+        alert("尚未設定有效的 API_URL，無法驗證管理密碼！");
+        return;
+      }
+
+      const loginBtn = document.getElementById("login-btn");
+      loginBtn.disabled = true;
+      loginBtn.innerText = "驗證中...";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: JSON.stringify({
+            action: "fetchData",
+            password: pwd
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          fetchedData = result.data || [];
+          renderDashboard(fetchedData);
+          showSection('admin-dashboard-section');
+        } else {
+          alert(result.message || "密碼錯誤！");
+        }
+      } catch (err) {
+        console.error("登入錯誤:", err);
+        alert("登入驗證失敗，請檢查網路連接或 Apps Script。");
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = "登入驗證";
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById("admin-password").value = "";
+      fetchedData = [];
+      showSection('survey-section');
+    }
+
+    // 渲染管理統計
+    function renderDashboard(data) {
+      const total = data.length;
+      document.getElementById("stat-total").innerText = total;
+
+      if (total === 0) {
+        document.getElementById("stat-workload").innerText = "-";
+        document.getElementById("stat-fairness").innerText = "-";
+        document.getElementById("stat-satisfaction").innerText = "-";
+        document.getElementById("feedback-list").innerHTML = '<div class="p-6 text-center text-editorial-muted text-sm">目前尚無意見回覆資料。</div>';
+        return;
+      }
+
+      // Q2. 工作量剛好比例
+      const q2剛好 = data.filter(d => d.q2 === "剛好").length;
+      document.getElementById("stat-workload").innerText = Math.round((q2剛好 / total) * 100) + "%";
+
+      // Q7. 主管公平度「非常公平」或「還算公平」比例
+      const q7公平 = data.filter(d => d.q7 === "非常公平" || d.q7 === "還算公平").length;
+      document.getElementById("stat-fairness").innerText = Math.round((q7公平 / total) * 100) + "%";
+
+      // Q12. 總體感覺「非常滿意」或「滿意」比例
+      const q12滿意 = data.filter(d => d.q12 === "非常滿意" || d.q12 === "滿意").length;
+      document.getElementById("stat-satisfaction").innerText = Math.round((q12滿意 / total) * 100) + "%";
+
+      // 載入當前所選題目的圖表
+      loadQuestionChart();
+
+      // Q15. 開放式意見列表
+      const feedbackListEl = document.getElementById("feedback-list");
+      const feedbacks = data.filter(d => d.q15 && d.q15.trim() !== "");
+      
+      document.getElementById("feedback-count").innerText = `${feedbacks.length} 則`;
+
+      if (feedbacks.length === 0) {
+        feedbackListEl.innerHTML = '<div class="p-6 text-center text-editorial-muted text-sm">目前尚無文字建議與意見。</div>';
+      } else {
+        // 反轉陣列，讓最新留言顯示在最上面
+        feedbackListEl.innerHTML = feedbacks.reverse().map(f => {
+          const formattedTime = f.timestamp ? new Date(f.timestamp).toLocaleString("zh-TW") : "時間不詳";
+          return `
+            <div class="p-5 hover:bg-neutral-50 transition-colors">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-semibold px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">年資: ${f.q1 || "不詳"}</span>
+                <span class="text-xs text-editorial-muted">${formattedTime}</span>
+              </div>
+              <p class="text-sm text-editorial-text leading-relaxed whitespace-pre-wrap">${escapeHtml(f.q15)}</p>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    // 處理選取特定題目並渲染 Chart.js 統計圖表
+    function loadQuestionChart() {
+      const qid = document.getElementById("question-select").value;
+      const selectEl = document.getElementById("question-select");
+      const qText = selectEl.options[selectEl.selectedIndex].text;
+      
+      document.getElementById("chart-title").innerText = qText + " 統計分佈";
+
+      // 取得預設選項分類
+      const optionsConfig = {
+        q1: ["三個月以上，未滿一年", "一年以上，未滿三年", "三年以上，未滿五年", "五年以上，未滿十年", "十年以上"],
+        q2: ["非常多", "有點多，但還能接受", "剛好", "有點少，希望能承擔更多工作", "太少"],
+        q3: ["工作經驗及個人能力", "績效考核的結果", "在公司的服務年資"],
+        q4: ["公司發展前景", "薪資福利佳", "良好的晉升成長制度", "與同事間相處融洽", "主管的管理風格"],
+        q5: ["外語能力課程", "專業技能提升", "組織管理能力", "報考專業證照補助"],
+        q6: ["很棒的主管, 可以學習到很多", "還不錯, 願意教導我們", "普通", "很差"],
+        q7: ["非常公平", "還算公平", "普通", "不公平", "非常偏袒別人"],
+        q8: ["非常清楚，主管有明確告知及定期溝通調整", "稍微清楚，主管有告知目前工作目標", "不清楚，僅面試當天提過工作內容", "非常不清楚，僅同仁告訴我工作目標"],
+        q9: ["小團體太多", "主管不聽下屬的意見", "工作氣氛不佳", "作業流程混亂", "加班太多或太晚下班"],
+        q10: ["升遷制度不健全或不透明", "沒有良好溝通管道", "主管無法掌握部屬工作職掌", "工作環境或氣氛不佳", "員工福利不好"],
+        q11: ["沒有需要改善的地方", "停車位", "洗手間", "茶水間", "辦公室", "休息空間"],
+        q12: ["非常滿意", "滿意", "普通", "不太滿意"],
+        q13: ["一對一的員工關懷", "協助和部門主管的溝通", "建立更完善的升遷制度"],
+        q14: ["多增加特約商店 (飯店、餐廳、住宿等)", "舉辦公益活動 (淨灘、掃街、探視老人院、孤兒院等)", "舉辦球類活動 (羽毛球、棒球、籃球、乒乓球等)", "增設運動器材 (乒乓球桌等)"]
+      };
+
+      const defaultOptions = optionsConfig[qid] || [];
+      const countsMap = {};
+      
+      // 初始化 counts
+      defaultOptions.forEach(opt => countsMap[opt] = 0);
+      countsMap["其他"] = 0;
+
+      // 累加數值
+      fetchedData.forEach(d => {
+        const val = d[qid];
+        if (!val) return;
+        
+        // 如果是複選題，用「、」拆開統計
+        const subValues = val.split("、");
+        subValues.forEach(v => {
+          const trimmedVal = v.trim();
+          if (defaultOptions.includes(trimmedVal)) {
+            countsMap[trimmedVal]++;
+          } else if (trimmedVal.startsWith("其他：") || trimmedVal === "其他") {
+            countsMap["其他"]++;
+          } else if (trimmedVal) {
+            // 如果填寫了特定的其他說明內容，也歸入「其他」
+            countsMap["其他"]++;
+          }
+        });
+      });
+
+      // 轉換成 Chart.js 所需格式
+      const labels = Object.keys(countsMap);
+      const counts = Object.values(countsMap);
+
+      // 渲染圖表
+      if (activeChart) {
+        activeChart.destroy();
+      }
+
+      const isMultipleChoice = ["q3", "q4", "q5", "q9", "q10", "q11", "q14"].includes(qid);
+      document.getElementById("chart-type-indicator").innerText = isMultipleChoice ? "複選加總統計" : "單選比例統計";
+
+      const ctx = document.getElementById("analyzed-chart").getContext("2d");
+      
+      // 對於單選項目，採用精緻的 Pie 餅圖，對於複選項目，採用 Horizontal Bar 條形圖
+      if (isMultipleChoice) {
+        activeChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: counts,
+              backgroundColor: 'rgba(62, 74, 63, 0.85)', // HSL / Forest slate green
+              borderColor: '#3E4A3F',
+              borderWidth: 1,
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: 'y', // 橫向條形圖
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+          }
+        });
+      } else {
+        // 單選項目繪製 Pie / Doughnut 圖
+        const backgroundColors = [
+          '#3E4A3F', // Forest Green
+          '#627063', // Soft Sage
+          '#879688', // Light Olive
+          '#B1BEB2', // Pale Moss
+          '#D5DDD6', // Gray Green
+          '#E1E7E2'
+        ];
+        activeChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: counts,
+              backgroundColor: backgroundColors.slice(0, labels.length),
+              borderWidth: 1,
+              borderColor: '#FFFFFF'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: { boxWidth: 12, font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // 匯出 CSV 資料
+    function exportToCSV() {
+      if (fetchedData.length === 0) {
+        alert("目前尚無任何問卷數據！");
+        return;
+      }
+
+      // UTF-8 BOM 避免 Excel 開啟亂碼
+      let csvContent = "\uFEFF"; 
+      csvContent += "提交時間,1.任職時間 (單選),2.目前工作量看法 (單選),3.薪資福利考慮因素 (複選),4.公司最大吸引力 (複選),5.希望的培訓方向 (複選),6.對部門主管認同度 (單選),7.主管工作分配公平性 (單選),8.清楚明白工作目標 (單選),9.部門存在的主要問題 (複選),10.公司存在的主要問題 (複選),11.公司硬體設備改善 (複選),12.對公司總體感覺 (單選),13.希望人資部門給予幫助 (單選),14.希望福委會增加福利 (複選),15.具體建議與意見 (開放式)\n";
+
+      fetchedData.forEach(row => {
+        const time = row.timestamp ? new Date(row.timestamp).toLocaleString("zh-TW") : "";
+        const esc = (val) => {
+          if (!val) return "";
+          // 將內容中的雙引號轉換為兩個雙引號，並包裝於雙引號內，避免損毀 CSV 格式
+          return `"${val.replace(/"/g, '""')}"`;
+        };
+        
+        csvContent += `${time},${esc(row.q1)},${esc(row.q2)},${esc(row.q3)},${esc(row.q4)},${esc(row.q5)},${esc(row.q6)},${esc(row.q7)},${esc(row.q8)},${esc(row.q9)},${esc(row.q10)},${esc(row.q11)},${esc(row.q12)},${esc(row.q13)},${esc(row.q14)},${esc(row.q15)}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      
+      const dateStr = new Date().toISOString().split("T")[0];
+      link.setAttribute("download", `伯堅公司_員工滿意度調查數據_${dateStr}.csv`);
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // HTML 轉義防 XSS
+    function escapeHtml(text) {
+      if (!text) return "";
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
