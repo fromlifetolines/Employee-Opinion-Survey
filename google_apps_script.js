@@ -97,27 +97,28 @@ function doPost(e) {
         return createCorsResponse({ success: true, data: [] }); // 沒有數據
       }
 
-      // 取得第 2 列到最後一列，共 16 欄 (1 提交時間 + 15 題)
-      const range = sheet.getRange(2, 1, lastRow - 1, 16);
+      // 取得第 2 列到最後一列，動態讀取欄位數，避免欄位不足時崩潰
+      const lastColumn = Math.max(sheet.getLastColumn(), 1);
+      const range = sheet.getRange(2, 1, lastRow - 1, lastColumn);
       const values = range.getValues();
 
       const data = values.map(row => ({
-        timestamp: row[0],
-        q1: row[1],
-        q2: row[2],
-        q3: row[3],
-        q4: row[4],
-        q5: row[5],
-        q6: row[6],
-        q7: row[7],
-        q8: row[8],
-        q9: row[9],
-        q10: row[10],
-        q11: row[11],
-        q12: row[12],
-        q13: row[13],
-        q14: row[14],
-        q15: row[15]
+        timestamp: row[0] || "",
+        q1: row[1] || "",
+        q2: row[2] || "",
+        q3: row[3] || "",
+        q4: row[4] || "",
+        q5: row[5] || "",
+        q6: row[6] || "",
+        q7: row[7] || "",
+        q8: row[8] || "",
+        q9: row[9] || "",
+        q10: row[10] || "",
+        q11: row[11] || "",
+        q12: row[12] || "",
+        q13: row[13] || "",
+        q14: row[14] || "",
+        q15: row[15] || ""
       }));
 
       return createCorsResponse({ success: true, data: data });
