@@ -1,5 +1,5 @@
 /**
- * 員工意見調查 - Google Apps Script 後端腳本
+ * 伯堅股份有限公司 - 員工滿意度調查表 - Google Apps Script 後端腳本
  *
  * 【設定說明】
  * 1. 開啟您的 Google 雲端硬碟，建立一個新的「Google 試算表」。
@@ -8,12 +8,12 @@
  * 4. 修改下方 `ADMIN_PASSWORD` 為您的管理密碼（用來在網頁解鎖看圖表）。
  * 5. 點擊右上角「部署」 > 「新增部署」。
  * 6. 選取類型為「網頁應用程式」。
- * 7. 「誰有權存取」設定為「所有人」(Anyone)（這樣員工才能匿名提交）。
+ * 7. 「誰有權存取」設定為「所有人」(Anyone)。
  * 8. 點擊「部署」，授予必要的 Google 帳號權限，並複製產生的「網頁應用程式 URL」。
  * 9. 將該 URL 貼回 `index.html` 中的 `API_URL` 變數中即可。
  */
 
-// 🔒 請在此處設定您的管理者登入密碼（可用於解鎖網頁圖表與導出數據）
+// 🔒 請在此處設定您的管理者登入密碼
 const ADMIN_PASSWORD = "admin-survey-pwd";
 
 // 處理跨網域 (CORS) 的回應輔助函式
@@ -25,7 +25,7 @@ function createCorsResponse(data) {
     .setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// 處理 OPTIONS 請求（瀏覽器 CORS 預檢請求）
+// 處理 OPTIONS 預檢請求
 function doOptions(e) {
   return ContentService.createTextOutput("")
     .setMimeType(ContentService.MimeType.TEXT)
@@ -44,24 +44,46 @@ function doPost(e) {
     if (action === "submit") {
       const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
       
-      // 如果試算表是空的，先寫入標題列
+      // 如果試算表是空的，寫入標題列 (15 題 + 提交時間)
       if (sheet.getLastRow() === 0) {
         sheet.appendRow([
-          "提交時間", 
-          "整體工作滿意度", 
-          "工作環境與資源", 
-          "團隊溝通與協作", 
-          "具體意見與改進建議"
+          "提交時間",
+          "1. 任職時間 (單選)",
+          "2. 目前工作量看法 (單選)",
+          "3. 薪資福利考慮因素 (複選)",
+          "4. 公司最大吸引力 (複選)",
+          "5. 希望的培訓方向 (複選)",
+          "6. 對部門主管認同度 (單選)",
+          "7. 主管工作分配公平性 (單選)",
+          "8. 清楚明白工作目標 (單選)",
+          "9. 部門存在的主要問題 (複選)",
+          "10. 公司存在的主要問題 (複選)",
+          "11. 公司硬體設備改善 (複選)",
+          "12. 對公司總體感覺 (單選)",
+          "13. 希望人資部門給予幫助 (單選)",
+          "14. 希望福委會增加福利 (複選)",
+          "15. 具體建議與意見 (開放式)"
         ]);
       }
 
       // 寫入問卷內容 (完全不記錄 IP、Email 等個人資訊)
       sheet.appendRow([
         new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
-        postData.q1, // 整體滿意度 (數字 1-5)
-        postData.q2, // 工作環境 (數字 1-5)
-        postData.q3, // 團隊溝通 (數字 1-5)
-        postData.q4  // 開放式建議 (字串)
+        postData.q1,
+        postData.q2,
+        postData.q3,
+        postData.q4,
+        postData.q5,
+        postData.q6,
+        postData.q7,
+        postData.q8,
+        postData.q9,
+        postData.q10,
+        postData.q11,
+        postData.q12,
+        postData.q13,
+        postData.q14,
+        postData.q15
       ]);
 
       return createCorsResponse({ success: true, message: "問卷提交成功！感謝您的寶貴意見。" });
@@ -81,15 +103,27 @@ function doPost(e) {
         return createCorsResponse({ success: true, data: [] }); // 沒有數據
       }
 
-      const range = sheet.getRange(2, 1, lastRow - 1, 5); // 取得第 2 列到最後一列，共 5 欄
+      // 取得第 2 列到最後一列，共 16 欄 (1 提交時間 + 15 題)
+      const range = sheet.getRange(2, 1, lastRow - 1, 16);
       const values = range.getValues();
 
       const data = values.map(row => ({
         timestamp: row[0],
-        q1: Number(row[1]),
-        q2: Number(row[2]),
-        q3: Number(row[3]),
-        q4: row[4]
+        q1: row[1],
+        q2: row[2],
+        q3: row[3],
+        q4: row[4],
+        q5: row[5],
+        q6: row[6],
+        q7: row[7],
+        q8: row[8],
+        q9: row[9],
+        q10: row[10],
+        q11: row[11],
+        q12: row[12],
+        q13: row[13],
+        q14: row[14],
+        q15: row[15]
       }));
 
       return createCorsResponse({ success: true, data: data });
