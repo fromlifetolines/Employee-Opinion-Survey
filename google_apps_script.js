@@ -14,7 +14,7 @@
  */
 
 // 🔒 請在此處設定您的管理者登入密碼
-const ADMIN_PASSWORD = "admin-survey-pwd";
+const ADMIN_PASSWORD = "Bg20840381";
 
 // 處理跨網域 (CORS) 的回應輔助函式
 function createCorsResponse(data) {
