@@ -18,8 +18,16 @@ const ADMIN_PASSWORD = "Bg20840381";
 
 // 處理跨網域 (CORS) 的回應輔助函式
 function createCorsResponse(data) {
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
+  try {
+    return ContentService.createTextOutput(JSON.stringify(data))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    // 萬一序列化失敗，回傳最基礎的錯誤 JSON，確保瀏覽器不會因為 CORS 阻擋而看不到錯誤訊息
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: false, 
+      message: "序列化回應失敗: " + err.toString() 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // 處理 OPTIONS 預檢請求
@@ -31,12 +39,17 @@ function doOptions(e) {
 // 處理 POST 請求
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return createCorsResponse({ success: false, message: "無效的請求內容" });
+    }
+
     const postData = JSON.parse(e.postData.contents);
     const action = postData.action;
 
     // 1. 提交問卷
     if (action === "submit") {
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      // 避免使用 getActiveSheet()（因為管理者若開著其他分頁，會寫錯分頁），一律使用第一個分頁
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
       
       // 如果試算表是空的，寫入標題列 (15 題 + 提交時間)
       if (sheet.getLastRow() === 0) {
@@ -63,21 +76,21 @@ function doPost(e) {
       // 寫入問卷內容 (完全不記錄 IP、Email 等個人資訊)
       sheet.appendRow([
         new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
-        postData.q1,
-        postData.q2,
-        postData.q3,
-        postData.q4,
-        postData.q5,
-        postData.q6,
-        postData.q7,
-        postData.q8,
-        postData.q9,
-        postData.q10,
-        postData.q11,
-        postData.q12,
-        postData.q13,
-        postData.q14,
-        postData.q15
+        postData.q1 || "",
+        postData.q2 || "",
+        postData.q3 || "",
+        postData.q4 || "",
+        postData.q5 || "",
+        postData.q6 || "",
+        postData.q7 || "",
+        postData.q8 || "",
+        postData.q9 || "",
+        postData.q10 || "",
+        postData.q11 || "",
+        postData.q12 || "",
+        postData.q13 || "",
+        postData.q14 || "",
+        postData.q15 || ""
       ]);
 
       return createCorsResponse({ success: true, message: "問卷提交成功！感謝您的寶貴意見。" });
@@ -90,7 +103,8 @@ function doPost(e) {
         return createCorsResponse({ success: false, message: "密碼錯誤！無法載入數據。" });
       }
 
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+      // 一律讀取第一個分頁，避免受到管理者當前在 Google 試算表網頁開啟哪個分頁影響
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
       const lastRow = sheet.getLastRow();
       
       if (lastRow <= 1) {
@@ -102,24 +116,46 @@ function doPost(e) {
       const range = sheet.getRange(2, 1, lastRow - 1, lastColumn);
       const values = range.getValues();
 
-      const data = values.map(row => ({
-        timestamp: row[0] || "",
-        q1: row[1] || "",
-        q2: row[2] || "",
-        q3: row[3] || "",
-        q4: row[4] || "",
-        q5: row[5] || "",
-        q6: row[6] || "",
-        q7: row[7] || "",
-        q8: row[8] || "",
-        q9: row[9] || "",
-        q10: row[10] || "",
-        q11: row[11] || "",
-        q12: row[12] || "",
-        q13: row[13] || "",
-        q14: row[14] || "",
-        q15: row[15] || ""
-      }));
+      // 安全地轉換每一列數據為字串，防止包含非 JSON 格式物件（例如 Date、錯誤物件等）導致 JSON.stringify 崩潰
+      const data = values.map(row => {
+        let timestampStr = "";
+        if (row[0]) {
+          if (row[0] instanceof Date) {
+            try {
+              timestampStr = Utilities.formatDate(row[0], "Asia/Taipei", "yyyy/MM/dd HH:mm:ss");
+            } catch (dateErr) {
+              timestampStr = row[0].toString();
+            }
+          } else {
+            timestampStr = row[0].toString();
+          }
+        }
+        
+        // 輔助函式，確保儲存格內容轉為乾淨的字串
+        const cellToStr = (val) => {
+          if (val === null || val === undefined) return "";
+          return val.toString();
+        };
+
+        return {
+          timestamp: timestampStr,
+          q1: cellToStr(row[1]),
+          q2: cellToStr(row[2]),
+          q3: cellToStr(row[3]),
+          q4: cellToStr(row[4]),
+          q5: cellToStr(row[5]),
+          q6: cellToStr(row[6]),
+          q7: cellToStr(row[7]),
+          q8: cellToStr(row[8]),
+          q9: cellToStr(row[9]),
+          q10: cellToStr(row[10]),
+          q11: cellToStr(row[11]),
+          q12: cellToStr(row[12]),
+          q13: cellToStr(row[13]),
+          q14: cellToStr(row[14]),
+          q15: cellToStr(row[15])
+        };
+      });
 
       return createCorsResponse({ success: true, data: data });
     }
