@@ -2677,14 +2677,27 @@
           });
         } else {
           // 單選題及評分題：繪製 Doughnut 圓餅圖
-          const baseColors = [
-            "#3E4A3F", // 5分 / Forest Green
-            "#627063", // 4分 / Soft Sage
-            "#879688", // 3分 / Light Olive
-            "#B1BEB2", // 2分 / Muted Grey Green
-            "#D5DDD6", // 1分
-            "#E1E7E2", // 其他
-          ];
+          let colors = [];
+          if (isRating) {
+            colors = labels.map(l => {
+              if (l === "5") return "#3E4A3F";
+              if (l === "4") return "#627063";
+              if (l === "3") return "#E3E2DE";
+              if (l === "2") return "#B88D6F";
+              if (l === "1") return "#9C5353";
+              return "#E1E7E2"; // 其他
+            });
+          } else {
+            const baseColors = [
+              "#3E4A3F", // Forest Green
+              "#627063", // Soft Sage
+              "#879688", // Light Olive
+              "#B1BEB2", // Muted Grey Green
+              "#D5DDD6",
+              "#E1E7E2", // 其他
+            ];
+            colors = baseColors.slice(0, labels.length);
+          }
 
           // 針對 5-1 量表，將 labels 做更友善的文字包裝
           let chartLabels = [...labels];
@@ -2706,7 +2719,7 @@
               datasets: [
                 {
                   data: counts,
-                  backgroundColor: baseColors.slice(0, labels.length),
+                  backgroundColor: colors,
                   borderWidth: 1,
                   borderColor: "#FFFFFF",
                 },
