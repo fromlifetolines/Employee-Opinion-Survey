@@ -173,16 +173,40 @@
             </span>
           </div>
 
+          <!-- Company Switcher Pill Tab -->
+          <div class="flex justify-center md:justify-start mb-8">
+            <div class="relative bg-neutral-100 p-1 rounded-full flex gap-1 border border-editorial-border w-full max-w-lg shadow-inner">
+              <button
+                type="button"
+                id="btn-comp-bojian"
+                onclick="switchCompany('伯堅股份有限公司')"
+                class="flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm"
+              >
+                伯堅股份有限公司
+              </button>
+              <button
+                type="button"
+                id="btn-comp-shanghai"
+                onclick="switchCompany('伯堅益嵐國際貿易(上海)有限公司')"
+                class="flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-editorial-muted hover:text-editorial-text"
+              >
+                伯堅上海分公司
+              </button>
+            </div>
+          </div>
+
           <!-- Main headings with elegant borders and fonts -->
           <div
             class="border-l-4 border-editorial-accent pl-4 md:pl-5 space-y-1 mb-6 text-left"
           >
             <h1
-              class="font-serif text-3xl md:text-5xl text-editorial-text font-bold tracking-tight"
+              id="company-heading"
+              class="font-serif text-3xl md:text-5xl text-editorial-text font-bold tracking-tight transition-all duration-300"
             >
               伯堅股份有限公司
             </h1>
             <h2
+              id="company-subtitle"
               class="font-serif italic text-xl md:text-2xl text-editorial-muted font-medium"
             >
               員工敬業度暨滿意度調查表
@@ -1874,6 +1898,25 @@
           </div>
         </div>
 
+        <!-- Company Filter Selector -->
+        <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-neutral-50 border border-editorial-border rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-editorial-text">公司篩選：</span>
+            <select
+              id="admin-company-select"
+              onchange="filterAdminData()"
+              class="border border-editorial-border rounded-lg bg-white p-2 text-sm focus:outline-none focus:border-editorial-accent font-semibold text-editorial-text cursor-pointer"
+            >
+              <option value="全部">全部公司</option>
+              <option value="伯堅股份有限公司">伯堅股份有限公司</option>
+              <option value="伯堅益嵐國際貿易(上海)有限公司">伯堅益嵐國際貿易(上海)有限公司</option>
+            </select>
+          </div>
+          <div class="text-xs text-editorial-muted">
+            篩選後將自動更新回覆件數、KPI指標、圖表分佈與文字反饋
+          </div>
+        </div>
+
         <!-- 統計大牌卡 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div
@@ -2188,6 +2231,27 @@
         }
       }
 
+      // 切換公司狀態
+      let currentCompany = "伯堅股份有限公司";
+
+      function switchCompany(name) {
+        currentCompany = name;
+        
+        const btnBojian = document.getElementById("btn-comp-bojian");
+        const btnShanghai = document.getElementById("btn-comp-shanghai");
+        const heading = document.getElementById("company-heading");
+        
+        if (name === "伯堅股份有限公司") {
+          btnBojian.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm";
+          btnShanghai.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-editorial-muted hover:text-editorial-text";
+          heading.innerText = "伯堅股份有限公司";
+        } else {
+          btnBojian.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-editorial-muted hover:text-editorial-text";
+          btnShanghai.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm";
+          heading.innerText = "伯堅益嵐國際貿易(上海)有限公司";
+        }
+      }
+
       // 切換頁面區塊
       function showSection(sectionId) {
         const sections = [
@@ -2231,6 +2295,7 @@
         // 取得單選與複選答案
         const payload = {
           action: "submit",
+          company: currentCompany,
           seniority: getRadioValue("seniority"),
           department: getRadioValue("department"),
           q2_1: getRadioValue("q2_1"),
@@ -2375,9 +2440,11 @@
             }),
           });
 
-          const result = await response.json();
           if (result.success) {
             fetchedData = result.data || [];
+            if (document.getElementById("admin-company-select")) {
+              document.getElementById("admin-company-select").value = "全部";
+            }
             renderDashboard(fetchedData);
             showSection("admin-dashboard-section");
           } else {
@@ -2400,6 +2467,21 @@
         showSection("survey-section");
       }
 
+      // 取得篩選後的資料
+      function getFilteredData() {
+        const compFilter = document.getElementById("admin-company-select")?.value || "全部";
+        if (compFilter === "全部") {
+          return fetchedData;
+        }
+        return fetchedData.filter(d => d.company === compFilter);
+      }
+
+      // 切換後台篩選公司
+      function filterAdminData() {
+        const filtered = getFilteredData();
+        renderDashboard(filtered);
+      }
+
       // 渲染管理統計儀表板
       function renderDashboard(data) {
         const total = data.length;
@@ -2410,7 +2492,10 @@
           document.getElementById("stat-fairness").innerText = "-";
           document.getElementById("stat-satisfaction").innerText = "-";
           document.getElementById("feedback-list").innerHTML =
-            '<div class="p-6 text-center text-editorial-muted text-sm">目前尚無問卷資料。</div>';
+            '<div class="p-6 text-center text-editorial-muted text-sm">目前尚無此公司之問卷資料。</div>';
+          
+          // 重新載入空白圖表
+          loadQuestionChart();
           return;
         }
 
@@ -2489,7 +2574,8 @@
       function renderFeedbackList() {
         const qid = document.getElementById("feedback-type-select").value;
         const feedbackListEl = document.getElementById("feedback-list");
-        const feedbacks = fetchedData.filter(
+        const dataToUse = getFilteredData();
+        const feedbacks = dataToUse.filter(
           d => d[qid] && d[qid].trim() !== ""
         );
 
@@ -2507,10 +2593,11 @@
               const formattedTime = f.timestamp
                 ? new Date(f.timestamp).toLocaleString("zh-TW")
                 : "時間不詳";
+              const compBadge = f.company ? ` | 公司: ${f.company}` : "";
               return `
             <div class="p-5 hover:bg-neutral-50 transition-colors">
               <div class="flex justify-between items-center mb-2">
-                <span class="text-xs font-semibold px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">年資: ${f.seniority || "不詳"} | 部門: ${f.department || "不詳"}</span>
+                <span class="text-xs font-semibold px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">年資: ${f.seniority || "不詳"} | 部門: ${f.department || "不詳"}${compBadge}</span>
                 <span class="text-xs text-editorial-muted">${formattedTime}</span>
               </div>
               <p class="text-sm text-editorial-text leading-relaxed whitespace-pre-wrap">${escapeHtml(f[qid])}</p>
@@ -2578,7 +2665,8 @@
         countsMap["其他"] = 0;
 
         // 統計數據
-        fetchedData.forEach(d => {
+        const dataToUse = getFilteredData();
+        dataToUse.forEach(d => {
           const val = d[qid];
           if (!val) return;
 
@@ -2741,17 +2829,18 @@
 
       // 匯出 CSV 資料
       function exportToCSV() {
-        if (fetchedData.length === 0) {
-          alert("目前尚無任何問卷數據！");
+        const dataToUse = getFilteredData();
+        if (dataToUse.length === 0) {
+          alert("目前篩選條件下無任何問卷數據！");
           return;
         }
 
         // UTF-8 BOM 避免 Excel 開啟亂碼
         let csvContent = "\uFEFF";
         csvContent +=
-          "提交時間,在職年資,所屬部門,二-1.年度目標衡量,二-2.工作量合理性,二-3.設備工具授權,二-4.工作效能建議,三-1.主管指導專業支持,三-2.主管工作分配公平,三-3.心理安全感放心提意見,三-4.主管管理建議,四-1.部門共同目標合作,四-2.跨部門溝通無斷層,四-3.跨部門分歧解決機制,四-4.跨部門協作建議,五-1.規章制度執行一致,五-2.決策訊息及時透明,五-3.績效考核公平公正,五-4.行政手續簡便,五-5.管理制度建議,六-1.晉升加薪路徑標準,六-2.薪資獎勵反映貢獻,六-3.未來職涯成長空間,六-4.薪酬與升遷建議,七-1.發展策略信心與文化認同,七-2.向親友推薦公司,七-3.高薪仍願意留任,七-4.公司文化或向心力建議,八-1.最阻礙效率因素(複選),九-1.福利活動舉辦頻率滿意度,九-2.福利活動增進同事情感,九-3.節慶禮金禮品滿意度,九-4.最感興趣活動類型(複選),九-5.福利活動建議,十-1.改變公司的一件事,十-2.最值得保留的優點,十-3.對董事長說的話\n";
+          "提交時間,公司,在職年資,所屬部門,二-1.年度目標衡量,二-2.工作量合理性,二-3.設備工具授權,二-4.工作效能建議,三-1.主管指導專業支持,三-2.主管工作分配公平,三-3.心理安全感放心提意見,三-4.主管管理建議,四-1.部門共同目標合作,四-2.跨部門溝通無斷層,四-3.跨部門分歧解決機制,四-4.跨部門協作建議,五-1.規章制度執行一致,五-2.決策訊息及時透明,五-3.績效考核公平公正,五-4.行政手續簡便,五-5.管理制度建議,六-1.晉升加薪路徑標準,六-2.薪資獎勵反映貢獻,六-3.未來職涯成長空間,六-4.薪酬與升遷建議,七-1.發展策略信心與文化認同,七-2.向親友推薦公司,七-3.高薪仍願意留任,七-4.公司文化或向心力建議,八-1.最阻礙效率因素(複選),九-1.福利活動舉辦頻率滿意度,九-2.福利活動增進同事情感,九-3.節慶禮金禮品滿意度,九-4.最感興趣活動類型(複選),九-5.福利活動建議,十-1.改變公司的一件事,十-2.最值得保留的優點,十-3.對董事長說的話\n";
 
-        fetchedData.forEach(row => {
+        dataToUse.forEach(row => {
           const time = row.timestamp
             ? new Date(row.timestamp).toLocaleString("zh-TW")
             : "";
@@ -2760,7 +2849,7 @@
             return `"${String(val).replace(/"/g, '""')}"`;
           };
 
-          csvContent += `${time},${esc(row.seniority)},${esc(row.department)},${esc(row.q2_1)},${esc(row.q2_2)},${esc(row.q2_3)},${esc(row.q2_4)},${esc(row.q3_1)},${esc(row.q3_2)},${esc(row.q3_3)},${esc(row.q3_4)},${esc(row.q4_1)},${esc(row.q4_2)},${esc(row.q4_3)},${esc(row.q4_4)},${esc(row.q5_1)},${esc(row.q5_2)},${esc(row.q5_3)},${esc(row.q5_4)},${esc(row.q5_5)},${esc(row.q6_1)},${esc(row.q6_2)},${esc(row.q6_3)},${esc(row.q6_4)},${esc(row.q7_1)},${esc(row.q7_2)},${esc(row.q7_3)},${esc(row.q7_4)},${esc(row.q8_1)},${esc(row.q9_1)},${esc(row.q9_2)},${esc(row.q9_3)},${esc(row.q9_4)},${esc(row.q9_5)},${esc(row.q10_1)},${esc(row.q10_2)},${esc(row.q10_3)}\n`;
+          csvContent += `${time},${esc(row.company)},${esc(row.seniority)},${esc(row.department)},${esc(row.q2_1)},${esc(row.q2_2)},${esc(row.q2_3)},${esc(row.q2_4)},${esc(row.q3_1)},${esc(row.q3_2)},${esc(row.q3_3)},${esc(row.q3_4)},${esc(row.q4_1)},${esc(row.q4_2)},${esc(row.q4_3)},${esc(row.q4_4)},${esc(row.q5_1)},${esc(row.q5_2)},${esc(row.q5_3)},${esc(row.q5_4)},${esc(row.q5_5)},${esc(row.q6_1)},${esc(row.q6_2)},${esc(row.q6_3)},${esc(row.q6_4)},${esc(row.q7_1)},${esc(row.q7_2)},${esc(row.q7_3)},${esc(row.q7_4)},${esc(row.q8_1)},${esc(row.q9_1)},${esc(row.q9_2)},${esc(row.q9_3)},${esc(row.q9_4)},${esc(row.q9_5)},${esc(row.q10_1)},${esc(row.q10_2)},${esc(row.q10_3)}\n`;
         });
 
         const blob = new Blob([csvContent], {
@@ -2771,9 +2860,11 @@
         link.setAttribute("href", url);
 
         const dateStr = new Date().toISOString().split("T")[0];
+        const activeComp = document.getElementById("admin-company-select")?.value || "全部";
+        const compSuffix = activeComp === "全部" ? "所有公司" : activeComp;
         link.setAttribute(
           "download",
-          `伯堅公司_員工敬業度暨滿意度調查數據_${dateStr}.csv`
+          `伯堅公司_${compSuffix}_員工敬業度暨滿意度調查數據_${dateStr}.csv`
         );
 
         document.body.appendChild(link);
