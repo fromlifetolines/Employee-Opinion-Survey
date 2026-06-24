@@ -134,7 +134,7 @@
     <script>
       // 🔗 【設定區】在此處填入您部署的 Google Apps Script 網頁應用程式 URL
       const API_URL =
-        "https://script.google.com/macros/s/AKfycbx7TWX16dWaHZ8gWT45YBMxwtVBfCmU3a5cFyXE_2bbnpExjfTld3o_i6AyVd9ZnkwY/exec";
+        "https://script.google.com/macros/s/AKfycbwGhOuH7PahQFdtTmQ6OTwVoV4L2lg-EBConLS8FCBkSH8xJOVjh4T0zoOCh2L7rkKH/exec";
     </script>
 
     <!-- 主容器 -->
@@ -2177,12 +2177,14 @@
     </footer>
 
     <script>
-      // 檢查 API 是否設定
+      // 檢查 API 是否設定，並初始化 UI 狀態
       document.addEventListener("DOMContentLoaded", () => {
         if (API_URL.includes("xxxxxx")) {
           document.getElementById("setup-warning").classList.remove("hidden");
         }
         initCheckboxLimits();
+        // ✅ 初始化公司切換器，確保 UI 與 currentCompany 狀態完全同步
+        switchCompany("伯堅股份有限公司");
       });
 
       // 限制痛點選擇上限為 3 項
@@ -2409,7 +2411,13 @@
         hideOtherField("q8_1");
         hideOtherField("q9_4");
 
+        // ✅ 重置公司切換器回預設「伯堅股份有限公司」，避免下一份問卷公司狀態錯誤
+        switchCompany("伯堅股份有限公司");
+
         showSection("survey-section");
+
+        // ✅ 捲回頁面最頂端，讓使用者看到公司選擇器
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       // 管理員登入控制
@@ -2851,9 +2859,8 @@
           "提交時間,公司,在職年資,所屬部門,二-1.年度目標衡量,二-2.工作量合理性,二-3.設備工具授權,二-4.工作效能建議,三-1.主管指導專業支持,三-2.主管工作分配公平,三-3.心理安全感放心提意見,三-4.主管管理建議,四-1.部門共同目標合作,四-2.跨部門溝通無斷層,四-3.跨部門分歧解決機制,四-4.跨部門協作建議,五-1.規章制度執行一致,五-2.決策訊息及時透明,五-3.績效考核公平公正,五-4.行政手續簡便,五-5.管理制度建議,六-1.晉升加薪路徑標準,六-2.薪資獎勵反映貢獻,六-3.未來職涯成長空間,六-4.薪酬與升遷建議,七-1.發展策略信心與文化認同,七-2.向親友推薦公司,七-3.高薪仍願意留任,七-4.公司文化或向心力建議,八-1.最阻礙效率因素(複選),九-1.福利活動舉辦頻率滿意度,九-2.福利活動增進同事情感,九-3.節慶禮金禮品滿意度,九-4.最感興趣活動類型(複選),九-5.福利活動建議,十-1.改變公司的一件事,十-2.最值得保留的優點,十-3.對董事長說的話\n";
 
         dataToUse.forEach(row => {
-          const time = row.timestamp
-            ? new Date(row.timestamp).toLocaleString("zh-TW")
-            : "";
+          // ✅ 修正：直接使用 timestamp 字串，避免 new Date() 無法解析中文格式時間
+          const time = row.timestamp ? String(row.timestamp) : "";
           const esc = val => {
             if (!val) return "";
             return `"${String(val).replace(/"/g, '""')}"`;
