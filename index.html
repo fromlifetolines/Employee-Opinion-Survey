@@ -2448,6 +2448,8 @@
             }),
           });
 
+          const result = await response.json();
+
           if (result.success) {
             fetchedData = result.data || [];
             if (document.getElementById("admin-company-select")) {
