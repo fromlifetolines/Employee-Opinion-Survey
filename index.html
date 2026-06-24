@@ -175,12 +175,17 @@
 
           <!-- Company Switcher Pill Tab -->
           <div class="flex justify-center md:justify-start mb-8">
-            <div class="relative bg-neutral-100 p-1 rounded-full flex gap-1 border border-editorial-border w-full max-w-lg shadow-inner">
+            <div class="relative bg-white/40 backdrop-blur-md p-1 rounded-full flex gap-1 border border-white/20 w-full max-w-lg shadow-lg">
+              <!-- Sliding Indicator -->
+              <div
+                id="comp-slider"
+                class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-[#3E4A3F] rounded-full transition-all duration-300 ease-out shadow-sm"
+              ></div>
               <button
                 type="button"
                 id="btn-comp-bojian"
                 onclick="switchCompany('伯堅股份有限公司')"
-                class="flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm"
+                class="flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white"
               >
                 伯堅股份有限公司
               </button>
@@ -201,7 +206,7 @@
           >
             <h1
               id="company-heading"
-              class="font-serif text-3xl md:text-5xl text-editorial-text font-bold tracking-tight transition-all duration-300"
+              class="font-serif text-2xl sm:text-3xl md:text-[34px] lg:text-5xl text-editorial-text font-bold tracking-tight transition-all duration-300"
             >
               伯堅股份有限公司
             </h1>
@@ -2240,14 +2245,17 @@
         const btnBojian = document.getElementById("btn-comp-bojian");
         const btnShanghai = document.getElementById("btn-comp-shanghai");
         const heading = document.getElementById("company-heading");
+        const slider = document.getElementById("comp-slider");
         
         if (name === "伯堅股份有限公司") {
-          btnBojian.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm";
+          slider.className = "absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-[#3E4A3F] rounded-full transition-all duration-300 ease-out shadow-sm";
+          btnBojian.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white";
           btnShanghai.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-editorial-muted hover:text-editorial-text";
           heading.innerText = "伯堅股份有限公司";
         } else {
+          slider.className = "absolute top-1 bottom-1 left-[calc(50%+2px)] w-[calc(50%-4px)] bg-[#3E4A3F] rounded-full transition-all duration-300 ease-out shadow-sm";
           btnBojian.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-editorial-muted hover:text-editorial-text";
-          btnShanghai.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white bg-[#3E4A3F] shadow-sm";
+          btnShanghai.className = "flex-grow flex-1 text-xs md:text-sm font-semibold py-2.5 px-4 rounded-full transition-all duration-300 relative z-10 text-white";
           heading.innerText = "伯堅益嵐國際貿易(上海)有限公司";
         }
       }
