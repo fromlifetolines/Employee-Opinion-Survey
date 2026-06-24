@@ -2348,13 +2348,23 @@
           const response = await fetch(API_URL, {
             method: "POST",
             mode: "cors",
+            redirect: "follow",
             headers: {
               "Content-Type": "text/plain",
             },
             body: JSON.stringify(payload),
           });
 
-          const result = await response.json();
+          // ✅ 先取得文字，再嘗試解析 JSON，避免非 JSON 回應導致崩潰
+          const rawText = await response.text();
+          let result;
+          try {
+            result = JSON.parse(rawText);
+          } catch (jsonErr) {
+            console.error("回應非 JSON:", rawText);
+            alert("提交失敗：Apps Script 回應格式異常，請確認部署設定。\n\n回應內容：" + rawText.substring(0, 200));
+            return;
+          }
 
           if (result.success) {
             showSection("success-section");
@@ -2363,7 +2373,7 @@
           }
         } catch (err) {
           console.error("提交錯誤:", err);
-          alert("問卷提交出錯，請確認您的網路連線或 Apps Script URL 設定。");
+          alert("問卷提交出錯：" + err.message);
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalText;
@@ -2447,6 +2457,7 @@
           const response = await fetch(API_URL, {
             method: "POST",
             mode: "cors",
+            redirect: "follow",
             headers: {
               "Content-Type": "text/plain",
             },
@@ -2456,7 +2467,16 @@
             }),
           });
 
-          const result = await response.json();
+          // ✅ 先取得文字，再嘗試解析 JSON，避免授權失敗回傳 HTML 時崩潰
+          const rawText = await response.text();
+          let result;
+          try {
+            result = JSON.parse(rawText);
+          } catch (jsonErr) {
+            console.error("回應非 JSON:", rawText);
+            alert("登入失敗：Apps Script 回應格式異常。\n\n可能原因：\n1. 密碼更改後未更新部署版本\n2. Apps Script 需要重新授權\n\n回應內容：" + rawText.substring(0, 300));
+            return;
+          }
 
           if (result.success) {
             fetchedData = result.data || [];
@@ -2470,9 +2490,7 @@
           }
         } catch (err) {
           console.error("登入錯誤:", err);
-          alert(
-            "登入驗證失敗，請檢查網路連接、多帳號登入問題，或 Apps Script 設定。"
-          );
+          alert("登入驗證失敗：" + err.message + "\n\n請檢查網路連接或 Apps Script 設定。");
         } finally {
           loginBtn.disabled = false;
           loginBtn.innerText = "登入驗證";
