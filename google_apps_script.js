@@ -1,5 +1,5 @@
 /**
- * 伯堅股份有限公司 - 員工滿意度調查表 - Google Apps Script 後端腳本
+ * 伯堅股份有限公司 - 員工敬業度暨滿意度調查表 - Google Apps Script 後端腳本
  *
  * 【設定說明】
  * 1. 開啟您的 Google 雲端硬碟，建立一個新的「Google 試算表」。
@@ -14,99 +14,135 @@
  */
 
 // 🔒 請在此處設定您的管理者登入密碼
-const ADMIN_PASSWORD = "Bg20840381";
+const ADMIN_PASSWORD = "admin-survey-pwd";
 
 // 處理跨網域 (CORS) 的回應輔助函式
 function createCorsResponse(data) {
-  try {
-    return ContentService.createTextOutput(JSON.stringify(data))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    // 萬一序列化失敗，回傳最基礎的錯誤 JSON，確保瀏覽器不會因為 CORS 阻擋而看不到錯誤訊息
-    return ContentService.createTextOutput(JSON.stringify({ 
-      success: false, 
-      message: "序列化回應失敗: " + err.toString() 
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(
+    ContentService.MimeType.JSON
+  );
 }
 
 // 處理 OPTIONS 預檢請求
 function doOptions(e) {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
+  return ContentService.createTextOutput("").setMimeType(
+    ContentService.MimeType.TEXT
+  );
 }
 
 // 處理 POST 請求
 function doPost(e) {
   try {
-    if (!e || !e.postData || !e.postData.contents) {
-      return createCorsResponse({ success: false, message: "無效的請求內容" });
-    }
-
     const postData = JSON.parse(e.postData.contents);
     const action = postData.action;
 
     // 1. 提交問卷
     if (action === "submit") {
-      // 避免使用 getActiveSheet()（因為管理者若開著其他分頁，會寫錯分頁），一律使用第一個分頁
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-      
-      // 如果試算表是空的，寫入標題列 (15 題 + 提交時間)
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+      // 如果試算表是空的，寫入標題列 (36 題 + 提交時間 = 37 欄)
       if (sheet.getLastRow() === 0) {
         sheet.appendRow([
           "提交時間",
-          "1. 任職時間 (單選)",
-          "2. 目前工作量看法 (單選)",
-          "3. 薪資福利考慮因素 (複選)",
-          "4. 公司最大吸引力 (複選)",
-          "5. 希望的培訓方向 (複選)",
-          "6. 對部門主管認同度 (單選)",
-          "7. 主管工作分配公平性 (單選)",
-          "8. 清楚明白工作目標 (單選)",
-          "9. 部門存在的主要問題 (複選)",
-          "10. 公司存在的主要問題 (複選)",
-          "11. 公司硬體設備改善 (複選)",
-          "12. 對公司總體感覺 (單選)",
-          "13. 希望人資部門給予幫助 (單選)",
-          "14. 希望福委會增加福利 (複選)",
-          "15. 具體建議與意見 (開放式)"
+          "一、在職年資 (單選)",
+          "一、所屬部門 (單選)",
+          "二-1. 我清楚了解自己的年度目標以及如何衡量我的表現 (5-1分)",
+          "二-2. 目前的工作量雖然有挑戰，但在合理的範圍內 (5-1分)",
+          "二-3. 我擁有足夠的設備、工具與授權來完成工作 (5-1分)",
+          "二-4. 其他關於工作效能與資源的建議 (文字)",
+          "三-1. 我的直接主管能提供具體的指導與專業支持 (5-1分)",
+          "三-2. 主管在分配工作時是公平且合理的 (5-1分)",
+          "三-3. 在部門內，我可以放心提出不同意見而無後顧之憂 (5-1分)",
+          "三-4. 其他關於主管管理的建議 (文字)",
+          "四-1. 部門間能為了共同目標合作，而非各自為政 (5-1分)",
+          "四-2. 我能輕易獲取其他部門的資訊，不會感到溝通斷層 (5-1分)",
+          "四-3. 當跨部門意見分歧時，公司有合理的解決機制 (5-1分)",
+          "四-4. 其他關於跨部門協作的建議 (文字)",
+          "五-1. 公司的各項規章制度在各部門執行標準一致 (5-1分)",
+          "五-2. 公司的決策訊息或制度變更，能及時且透明地傳達給員工 (5-1分)",
+          "五-3. 公司的績效考核制度是公平、公正且有客觀依據的 (5-1分)",
+          "五-4. 我認為目前的請假、報支等行政手續是簡便而不繁瑣的 (5-1分)",
+          "五-5. 其他關於管理制度的建議 (文字)",
+          "六-1. 我清楚了解公司內部晉升或加薪的路徑與標準 (5-1分)",
+          "六-2. 公司的薪資及獎勵制度能反映我的實際貢獻與績效 (5-1分)",
+          "六-3. 在伯堅工作，我能看到未來的職涯成長空間 (5-1分)",
+          "六-4. 其他關於薪酬與升遷的建議 (文字)",
+          "七-1. 我對公司的發展策略有信心，並認同公司文化 (5-1分)",
+          "七-2. 我會向親友推薦伯堅是一間值得加入的公司 (5-1分)",
+          "七-3. 如果有其他公司提供更高薪水，我仍願意留在伯堅 (5-1分)",
+          "七-4. 其他關於公司文化或向心力的建議 (文字)",
+          "八-1. 您認為目前最阻礙您發揮效率的因素是？(複選，最多3項)",
+          "九-1. 我對公司目前舉辦福利活動的頻率感到滿意 (5-1分)",
+          "九-2. 我認為目前的福利活動有助於增進同事間的情感 (5-1分)",
+          "九-3. 我對公司提供的節慶禮金/禮品感到滿意 (5-1分)",
+          "九-4. 您最感興趣的活動類型是？(複選)",
+          "九-5. 其他關於福利活動的建議 (文字)",
+          "十-1. 如果明天您可以改變公司的一件事，那會是什麼？(文字)",
+          "十-2. 您認為公司目前「最值得保留」的優點是什麼？(文字)",
+          "十-3. 其他任何想對董事長說的話 (文字)",
         ]);
       }
 
       // 寫入問卷內容 (完全不記錄 IP、Email 等個人資訊)
       sheet.appendRow([
         new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
-        postData.q1 || "",
-        postData.q2 || "",
-        postData.q3 || "",
-        postData.q4 || "",
-        postData.q5 || "",
-        postData.q6 || "",
-        postData.q7 || "",
-        postData.q8 || "",
-        postData.q9 || "",
-        postData.q10 || "",
-        postData.q11 || "",
-        postData.q12 || "",
-        postData.q13 || "",
-        postData.q14 || "",
-        postData.q15 || ""
+        postData.seniority || "",
+        postData.department || "",
+        postData.q2_1 || "",
+        postData.q2_2 || "",
+        postData.q2_3 || "",
+        postData.q2_4 || "",
+        postData.q3_1 || "",
+        postData.q3_2 || "",
+        postData.q3_3 || "",
+        postData.q3_4 || "",
+        postData.q4_1 || "",
+        postData.q4_2 || "",
+        postData.q4_3 || "",
+        postData.q4_4 || "",
+        postData.q5_1 || "",
+        postData.q5_2 || "",
+        postData.q5_3 || "",
+        postData.q5_4 || "",
+        postData.q5_5 || "",
+        postData.q6_1 || "",
+        postData.q6_2 || "",
+        postData.q6_3 || "",
+        postData.q6_4 || "",
+        postData.q7_1 || "",
+        postData.q7_2 || "",
+        postData.q7_3 || "",
+        postData.q7_4 || "",
+        postData.q8_1 || "",
+        postData.q9_1 || "",
+        postData.q9_2 || "",
+        postData.q9_3 || "",
+        postData.q9_4 || "",
+        postData.q9_5 || "",
+        postData.q10_1 || "",
+        postData.q10_2 || "",
+        postData.q10_3 || "",
       ]);
 
-      return createCorsResponse({ success: true, message: "問卷提交成功！感謝您的寶貴意見。" });
+      return createCorsResponse({
+        success: true,
+        message: "問卷提交成功！感謝您的寶貴意見。",
+      });
     }
 
     // 2. 管理者讀取統計數據
     if (action === "fetchData") {
       const password = postData.password;
       if (password !== ADMIN_PASSWORD) {
-        return createCorsResponse({ success: false, message: "密碼錯誤！無法載入數據。" });
+        return createCorsResponse({
+          success: false,
+          message: "密碼錯誤！無法載入數據。",
+        });
       }
 
-      // 一律讀取第一個分頁，避免受到管理者當前在 Google 試算表網頁開啟哪個分頁影響
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
       const lastRow = sheet.getLastRow();
-      
+
       if (lastRow <= 1) {
         return createCorsResponse({ success: true, data: [] }); // 沒有數據
       }
@@ -116,61 +152,62 @@ function doPost(e) {
       const range = sheet.getRange(2, 1, lastRow - 1, lastColumn);
       const values = range.getValues();
 
-      // 安全地轉換每一列數據為字串，防止包含非 JSON 格式物件（例如 Date、錯誤物件等）導致 JSON.stringify 崩潰
-      const data = values.map(row => {
-        let timestampStr = "";
-        if (row[0]) {
-          if (row[0] instanceof Date) {
-            try {
-              timestampStr = Utilities.formatDate(row[0], "Asia/Taipei", "yyyy/MM/dd HH:mm:ss");
-            } catch (dateErr) {
-              timestampStr = row[0].toString();
-            }
-          } else {
-            timestampStr = row[0].toString();
-          }
-        }
-        
-        // 輔助函式，確保儲存格內容轉為乾淨的字串
-        const cellToStr = (val) => {
-          if (val === null || val === undefined) return "";
-          return val.toString();
-        };
-
-        return {
-          timestamp: timestampStr,
-          q1: cellToStr(row[1]),
-          q2: cellToStr(row[2]),
-          q3: cellToStr(row[3]),
-          q4: cellToStr(row[4]),
-          q5: cellToStr(row[5]),
-          q6: cellToStr(row[6]),
-          q7: cellToStr(row[7]),
-          q8: cellToStr(row[8]),
-          q9: cellToStr(row[9]),
-          q10: cellToStr(row[10]),
-          q11: cellToStr(row[11]),
-          q12: cellToStr(row[12]),
-          q13: cellToStr(row[13]),
-          q14: cellToStr(row[14]),
-          q15: cellToStr(row[15])
-        };
-      });
+      const data = values.map(row => ({
+        timestamp: row[0] || "",
+        seniority: row[1] || "",
+        department: row[2] || "",
+        q2_1: row[3] || "",
+        q2_2: row[4] || "",
+        q2_3: row[5] || "",
+        q2_4: row[6] || "",
+        q3_1: row[7] || "",
+        q3_2: row[8] || "",
+        q3_3: row[9] || "",
+        q3_4: row[10] || "",
+        q4_1: row[11] || "",
+        q4_2: row[12] || "",
+        q4_3: row[13] || "",
+        q4_4: row[14] || "",
+        q5_1: row[15] || "",
+        q5_2: row[16] || "",
+        q5_3: row[17] || "",
+        q5_4: row[18] || "",
+        q5_5: row[19] || "",
+        q6_1: row[20] || "",
+        q6_2: row[21] || "",
+        q6_3: row[22] || "",
+        q6_4: row[23] || "",
+        q7_1: row[24] || "",
+        q7_2: row[25] || "",
+        q7_3: row[26] || "",
+        q7_4: row[27] || "",
+        q8_1: row[28] || "",
+        q9_1: row[29] || "",
+        q9_2: row[30] || "",
+        q9_3: row[31] || "",
+        q9_4: row[32] || "",
+        q9_5: row[33] || "",
+        q10_1: row[34] || "",
+        q10_2: row[35] || "",
+        q10_3: row[36] || "",
+      }));
 
       return createCorsResponse({ success: true, data: data });
     }
 
     return createCorsResponse({ success: false, message: "未知的操作指令" });
-
   } catch (error) {
-    return createCorsResponse({ success: false, message: "伺服器錯誤: " + error.toString() });
+    return createCorsResponse({
+      success: false,
+      message: "伺服器錯誤: " + error.toString(),
+    });
   }
 }
 
 // 支援 GET 請求，方便管理測試
 function doGet(e) {
-  return createCorsResponse({ 
-    status: "ok", 
-    message: "Google Apps Script 運作正常！請使用 POST 方法進行提交與查詢。" 
+  return createCorsResponse({
+    status: "ok",
+    message: "Google Apps Script 運作正常！請使用 POST 方法進行提交與查詢。",
   });
 }
