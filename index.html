@@ -144,28 +144,92 @@
         id="survey-section"
         class="w-full max-w-3xl bg-white border border-editorial-border rounded-xl p-6 md:p-12 shadow-sm fade-in"
       >
-        <div class="mb-10 text-center md:text-left">
-          <span
-            class="text-xs uppercase tracking-widest text-editorial-muted font-semibold block mb-2"
-            >2026 Internal Survey</span
+        <div class="mb-10 text-center md:text-left relative">
+          <!-- Top badge row -->
+          <div
+            class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4"
           >
-          <h1
-            class="font-serif text-3xl md:text-4xl text-editorial-text font-bold mb-4 leading-tight"
+            <span
+              class="text-[10px] tracking-wider uppercase bg-editorial-accent/10 text-editorial-accent font-semibold px-2.5 py-1 rounded-full"
+            >
+              2026 Internal Survey
+            </span>
+            <span
+              class="text-[10px] tracking-wider text-emerald-800 bg-emerald-50 font-medium px-2.5 py-1 rounded-full flex items-center gap-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-3 w-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M2.166 4.9L10 1.154l7.834 3.746A1 1 0 0118 5.78v5.524a9.92 9.92 0 01-2.925 7.027 1 1 0 01-1.314.035L10 15.656l-3.76 2.709a1 1 0 01-1.314-.035A9.92 9.92 0 012 11.304V5.78a1 1 0 01.166-.88zM10 3.32L4 6.2v4.88c0 3.738 2.054 6.945 5 8.16 2.946-1.215 5-4.422 5-8.16V6.2l-6-2.88zm.707 6.387a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 10-1.414-1.414L11 11.293l-1.293-1.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              完全匿名傳輸保護
+            </span>
+          </div>
+
+          <!-- Main headings with elegant borders and fonts -->
+          <div
+            class="border-l-4 border-editorial-accent pl-4 md:pl-5 space-y-1 mb-6 text-left"
           >
-            伯堅股份有限公司
-          </h1>
-          <h2 class="text-xl md:text-2xl text-editorial-muted font-bold mb-4">
-            員工敬業度暨滿意度調查表
-          </h2>
-          <p class="text-sm text-editorial-muted leading-relaxed">
-            親愛的同仁您好：為持續改善工作環境、優化管理制度及提升員工福利，並了解大家對公司的真實想法與建言，特別進行本次員工意見調查。
+            <h1
+              class="font-serif text-3xl md:text-5xl text-editorial-text font-bold tracking-tight"
+            >
+              伯堅股份有限公司
+            </h1>
+            <h2
+              class="font-serif italic text-xl md:text-2xl text-editorial-muted font-medium"
+            >
+              員工敬業度暨滿意度調查表
+            </h2>
+          </div>
+
+          <!-- Elegant intro paragraph -->
+          <p
+            class="text-sm md:text-base text-editorial-muted leading-relaxed mb-6 text-left"
+          >
+            親愛的同仁您好：為持續改善工作環境、優化管理制度及提升員工福利，並了解大家對公司的真實想法與建言，特別進行本次員工意見調查。您的每一項意見，都是推動公司進步的重要力量。
           </p>
-          <p class="text-sm font-semibold text-editorial-accent mt-3">
-            *****
-            本問卷採不記名方式進行，所有資料僅作為公司整體改善、制度優化、整體統計及未來制度改善參考，請您實際感受安心作答。
-            *****
-          </p>
-          <div class="h-[1px] bg-editorial-border w-full mt-6"></div>
+
+          <!-- Privacy statement card callout -->
+          <div
+            class="bg-neutral-50/70 border border-editorial-border rounded-xl p-5 text-left flex items-start gap-4 shadow-sm"
+          >
+            <div
+              class="p-2.5 bg-emerald-50 rounded-lg text-emerald-800 shrink-0"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-sm font-bold text-editorial-text">
+                匿名性與隱私保障聲明
+              </h3>
+              <p class="text-xs text-editorial-muted leading-relaxed">
+                本問卷採用完全不記名方式進行，系統絕不收集您的姓名、電子郵件、IP
+                位址或設備資訊。所有回答資料僅作為公司整體改善、制度優化及統計分析參考，請您依真實感受安心作答。
+              </p>
+            </div>
+          </div>
+
+          <div class="h-[1px] bg-editorial-border w-full mt-8"></div>
         </div>
 
         <form id="survey-form" class="space-y-8" onsubmit="submitSurvey(event)">
