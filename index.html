@@ -137,6 +137,43 @@
         "https://script.google.com/macros/s/AKfycbyPmR26HzpGM02rg-_stNGxoEVoc5yYKgRfMRc2Fqcq3W50LiZjha2DWACFOS40oVM1/exec";
     </script>
 
+    <!-- 問卷已截止頁面 (預設隱藏，截止後自動顯示) -->
+    <div
+      id="survey-closed-section"
+      class="hidden flex-grow flex items-center justify-center p-4 md:p-8"
+    >
+      <div class="w-full max-w-xl bg-white border border-editorial-border rounded-xl p-8 md:p-14 shadow-sm text-center fade-in">
+        <!-- Icon -->
+        <div class="flex justify-center mb-6">
+          <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v2m0 4h.01" />
+            </svg>
+          </div>
+        </div>
+        <!-- Title -->
+        <span class="text-[10px] tracking-wider uppercase bg-red-100 text-red-600 font-semibold px-2.5 py-1 rounded-full mb-4 inline-block">
+          Survey Closed
+        </span>
+        <h1 class="font-serif text-2xl md:text-3xl font-bold text-editorial-text mt-3 mb-3">
+          問卷填寫已截止
+        </h1>
+        <p class="text-editorial-muted text-sm leading-relaxed mb-2">
+          本次員工意見調查已於
+          <strong class="text-editorial-text">2026 年 6 月 28 日 23:59</strong>
+          正式截止。
+        </p>
+        <p class="text-editorial-muted text-sm leading-relaxed mb-8">
+          感謝所有填寫問卷的夥伴，您的意見將成為公司持續改善的重要依據。
+        </p>
+        <div class="border-t border-editorial-border pt-6">
+          <p class="text-xs text-editorial-muted">
+            如有任何疑問，請洽人資部門。
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- 主容器 -->
     <main class="flex-grow flex items-center justify-center p-4 md:p-8">
       <!-- 1. 問卷填寫介面 -->
@@ -2179,6 +2216,18 @@
     <script>
       // 檢查 API 是否設定，並初始化 UI 狀態
       document.addEventListener("DOMContentLoaded", () => {
+        // ✅ 截止時間檢查：2026/6/28 23:59（台北時間）
+        const DEADLINE = new Date("2026-06-28T23:59:00+08:00");
+        const now = new Date();
+        if (now > DEADLINE) {
+          // 已過截止時間：隱藏問卷主容器，顯示截止頁面
+          document.querySelector("main").style.display = "none";
+          document.getElementById("survey-closed-section").classList.remove("hidden");
+          document.getElementById("survey-closed-section").style.display = "flex";
+          // 管理者入口仍可使用（保留 footer）
+          return; // 不需要初始化問卷相關功能
+        }
+
         if (API_URL.includes("xxxxxx")) {
           document.getElementById("setup-warning").classList.remove("hidden");
         }
