@@ -2484,6 +2484,14 @@
       let activeChart = null;
 
       function openAdmin() {
+        // ✅ 若在截止頁面，需先恢復 main 可見性並隱藏截止區
+        const closedSection = document.getElementById("survey-closed-section");
+        const mainEl = document.querySelector("main");
+        if (closedSection && !closedSection.classList.contains("hidden")) {
+          closedSection.style.display = "none";
+          closedSection.classList.add("hidden");
+          mainEl.style.display = "";
+        }
         showSection("admin-login-section");
       }
 
@@ -2549,7 +2557,18 @@
       function logoutAdmin() {
         document.getElementById("admin-password").value = "";
         fetchedData = [];
-        showSection("survey-section");
+
+        // ✅ 若已過截止時間，登出後回到截止頁面而非問卷頁
+        const DEADLINE = new Date("2026-06-28T23:59:00+08:00");
+        if (new Date() > DEADLINE) {
+          showSection("survey-section"); // 先切換（隱藏 dashboard）
+          document.querySelector("main").style.display = "none";
+          const closedSection = document.getElementById("survey-closed-section");
+          closedSection.classList.remove("hidden");
+          closedSection.style.display = "flex";
+        } else {
+          showSection("survey-section");
+        }
       }
 
       // 取得篩選後的資料
